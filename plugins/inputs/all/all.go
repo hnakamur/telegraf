@@ -18,6 +18,7 @@ import (
 	_ "github.com/influxdata/telegraf/plugins/inputs/jolokia"
 	_ "github.com/influxdata/telegraf/plugins/inputs/kafka_consumer"
 	_ "github.com/influxdata/telegraf/plugins/inputs/leofs"
+	_ "github.com/influxdata/telegraf/plugins/inputs/ltsv_log"
 	_ "github.com/influxdata/telegraf/plugins/inputs/lustre2"
 	_ "github.com/influxdata/telegraf/plugins/inputs/mailchimp"
 	_ "github.com/influxdata/telegraf/plugins/inputs/memcached"
