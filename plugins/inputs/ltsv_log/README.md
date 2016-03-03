@@ -7,8 +7,8 @@ And when the log file is rotated, this plugin read logs until the end from the o
 ### Configuration:
 
 ```toml
+# Read a log file in LTSV (Labeled Tab-separated Values) format
 [[inputs.ltsv_log]]
-  # SampleConfig
   ## The measurement name
   measurement = "nginx_access"
   ## A LTSV formatted log file path
