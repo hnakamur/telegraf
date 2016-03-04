@@ -168,8 +168,11 @@ func (r *ltsvLogReader) read() (n int64, err error) {
 	size := info.Size()
 	defer r.setPrevFileSize(size)
 	var n2 int64
-	if size < r.prevFileSize {
-		// NOTE: If the log file size shrinks, we assume the log file was rotated.
+	if size < r.prevFileSize && size > 0 {
+		// NOTE: If the log file size is smaller than the previous size and is greater
+		// than zero, we assume the log file was rotated and logs are written to the
+		// new file.
+
 		// First we read logs from the rotated file.
 		n2, err = r.readCurrentFile()
 		if err != nil {
