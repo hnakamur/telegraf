@@ -13,6 +13,42 @@ import (
 	"github.com/influxdata/telegraf/plugins/inputs"
 )
 
+type DupPointModifier interface {
+	Modify(t *time.Time, tags map[string]string)
+}
+
+type AddTagDupPointModifier struct {
+	UniqTagName string
+	prevTime    time.Time
+	dupCount    int64
+}
+
+func (m *AddTagDupPointModifier) Modify(t *time.Time, tags map[string]string) {
+	if *t == m.prevTime {
+		m.dupCount++
+		tags[m.UniqTagName] = strconv.FormatInt(m.dupCount, 10)
+	} else {
+		m.dupCount = 0
+		m.prevTime = *t
+	}
+}
+
+type IncTimeDupPointModifier struct {
+	prevTime time.Time
+}
+
+func (m *IncTimeDupPointModifier) Modify(t *time.Time, _ map[string]string) {
+	if !t.After(m.prevTime) {
+		*t = m.prevTime.Add(time.Nanosecond)
+	}
+	m.prevTime = *t
+}
+
+type NoOpDupPointModifier struct{}
+
+func (n *NoOpDupPointModifier) Modify(_ *time.Time, _ map[string]string) {
+}
+
 type ltsvLogReader struct {
 	Measurement string
 	Path        string
@@ -23,8 +59,10 @@ type ltsvLogReader struct {
 	FloatFields []string
 	BoolFields  []string
 	// NOTE: I tried Tags, but values were not set, so I changed the name to LogTags.
-	LogTags          []string
-	WaitMilliseconds int
+	LogTags                          []string
+	WaitMilliseconds                 int
+	DuplicatePointsWorkaroundMethod  string
+	DuplicatePointsWorkaroundUniqTag string
 
 	sync.Mutex
 	done chan struct{}
@@ -34,8 +72,9 @@ type ltsvLogReader struct {
 	tagSet   map[string]bool
 
 	// NOTE: We keep the file open to read the rest after a log rotate.
-	file         *os.File
-	prevFileSize int64
+	file             *os.File
+	prevFileSize     int64
+	dupPointModifier DupPointModifier
 }
 
 var sampleConfig = `
@@ -83,6 +122,11 @@ var sampleConfig = `
   ## wait milliseconds when there is no log to read
   ## CAUTION: settings this value to 0 leads to high CPU usage
   wait_milliseconds = 10
+  ## duplicate points workaround method: add_uniq_tag, increment_time, or none.
+  ## See https://docs.influxdata.com/influxdb/v0.10/troubleshooting/frequently_encountered_issues/#writing-duplicate-points
+  duplicate_points_workaround_method = "increment_time"
+  ## tag name used for ensure uniquness of points
+  duplicate_points_workaround_uniq_tag = "uniq"
 `
 
 func (r *ltsvLogReader) SampleConfig() string {
@@ -102,6 +146,14 @@ func (r *ltsvLogReader) Start(acc telegraf.Accumulator) error {
 	r.done = make(chan struct{})
 	r.fieldSet = newFieldSet(r.StrFields, r.IntFields, r.FloatFields, r.BoolFields)
 	r.tagSet = newTagSet(r.LogTags)
+	switch r.DuplicatePointsWorkaroundMethod {
+	case "add_uniq_tag":
+		r.dupPointModifier = &AddTagDupPointModifier{UniqTagName: r.DuplicatePointsWorkaroundUniqTag}
+	case "increment_time":
+		r.dupPointModifier = &IncTimeDupPointModifier{}
+	default:
+		r.dupPointModifier = &NoOpDupPointModifier{}
+	}
 	err := r.openLog()
 	if err != nil {
 		return err
@@ -249,6 +301,7 @@ func (r *ltsvLogReader) processLine(line string) error {
 			tags[k] = kv[1]
 		}
 	}
+	r.dupPointModifier.Modify(&t, tags)
 	r.acc.AddFields(r.Measurement, fields, tags, t)
 	return nil
 }
