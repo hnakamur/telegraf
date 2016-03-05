@@ -11,17 +11,18 @@ import (
 )
 
 type LTSVParser struct {
-	MetricName                     string
-	TimeLabel                      string
-	TimeFormat                     string
-	StrFieldLabels                 []string
-	IntFieldLabels                 []string
-	FloatFieldLabels               []string
-	BoolFieldLabels                []string
-	TagLabels                      []string
-	DefaultTags                    map[string]string
-	DuplicatePointsModifierMethod  string
-	DuplicatePointsModifierUniqTag string
+	MetricName                       string
+	TimeLabel                        string
+	TimeFormat                       string
+	StrFieldLabels                   []string
+	IntFieldLabels                   []string
+	FloatFieldLabels                 []string
+	BoolFieldLabels                  []string
+	TagLabels                        []string
+	DefaultTags                      map[string]string
+	DuplicatePointsModifierMethod    string
+	DuplicatePointsIncrementDuration time.Duration
+	DuplicatePointsModifierUniqTag   string
 
 	initialized      bool
 	fieldLabelSet    map[string]string
@@ -130,7 +131,10 @@ func (p *LTSVParser) SetDefaultTags(tags map[string]string) {
 func (p *LTSVParser) initialize() error {
 	p.fieldLabelSet = newFieldLabelSet(p.StrFieldLabels, p.IntFieldLabels, p.FloatFieldLabels, p.BoolFieldLabels)
 	p.tagLabelSet = newTagLabelSet(p.TagLabels)
-	dupPointModifier, err := newDupPointModifier(p.DuplicatePointsModifierMethod, p.DuplicatePointsModifierUniqTag)
+	dupPointModifier, err := newDupPointModifier(
+		p.DuplicatePointsModifierMethod,
+		p.DuplicatePointsIncrementDuration,
+		p.DuplicatePointsModifierUniqTag)
 	if err != nil {
 		return err
 	}
@@ -168,12 +172,12 @@ type DuplicatePointModifier interface {
 	Modify(t *time.Time, tags map[string]string)
 }
 
-func newDupPointModifier(method, uniqTagName string) (DuplicatePointModifier, error) {
+func newDupPointModifier(method string, incrementDuration time.Duration, uniqTagName string) (DuplicatePointModifier, error) {
 	switch method {
 	case "add_uniq_tag":
 		return &AddTagDupPointModifier{UniqTagName: uniqTagName}, nil
 	case "increment_time":
-		return &IncTimeDupPointModifier{}, nil
+		return &IncTimeDupPointModifier{IncrementDuration: incrementDuration}, nil
 	case "no_op":
 		return &NoOpDupPointModifier{}, nil
 	default:
@@ -198,12 +202,13 @@ func (m *AddTagDupPointModifier) Modify(t *time.Time, tags map[string]string) {
 }
 
 type IncTimeDupPointModifier struct {
-	prevTime time.Time
+	IncrementDuration time.Duration
+	prevTime          time.Time
 }
 
 func (m *IncTimeDupPointModifier) Modify(t *time.Time, _ map[string]string) {
 	if !t.After(m.prevTime) {
-		*t = m.prevTime.Add(time.Nanosecond)
+		*t = m.prevTime.Add(m.IncrementDuration)
 	}
 	m.prevTime = *t
 }

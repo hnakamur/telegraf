@@ -101,16 +101,30 @@ It works like the BSD `tail` command and can keep reading when more logs are add
   ## MUST be sorted by timestamps in ascending order.
   duplicate_points_modifier_method = "add_uniq_tag"
 
+  ## When duplicate_points_modifier_method is "increment_time",
+  ## this will be added to the time of the previous measurement
+  ## if the time of current time is equal to or less than the
+  ## time of the previous measurement.
+  ##
+  ## NOTE: You need to set this value equal to or greater than
+  ## precisions of your output plugins. Otherwise the times will
+  ## become the same value!
+  ## For the precision of the InfluxDB plugin, please see
+  ## https://github.com/influxdata/telegraf/blob/v0.10.1/plugins/outputs/influxdb/influxdb.go#L40-L42
+  ## For the duration string format, please see
+  ## https://golang.org/pkg/time/#ParseDuration
+  duplicate_points_increment_duration = "1us"
+
   ## When duplicate_points_modifier_method is "add_uniq_tag",
   ## this will be the label of the tag to be added to ensure uniqueness of points.
   ## NOTE: The uniq tag will be only added to the successive points of duplicated
   ## points, it will not be added to the first point of duplicated points.
   ## If you want to always add the uniq tag, add a tag with the same name as
-  ## duplicate_points_modifier_uniq_tag and the string value "0" to default_tags.
+  ## duplicate_points_modifier_uniq_tag and the string value "0" to [inputs.tail.tags].
   duplicate_points_modifier_uniq_tag = "uniq"
 
   ## Defaults tags to be added to measurements.
-  [default_tags]
+  [inputs.tail.tags]
     log_host = "log.example.com"
 ```
 
@@ -128,19 +142,20 @@ It works like the BSD `tail` command and can keep reading when more logs are add
 #### Example Output:
 
 ```
-[root@localhost bin]# sudo -u telegraf ./telegraf -config /etc/telegraf/telegraf.conf -input-filter tail -debug & for i in `seq 1 3`; do curl -s -o /dev/null localhost; done
-[1] 16874
-2016/03/05 17:12:12 Attempting connection to output: influxdb
-2016/03/05 17:12:12 Successfully connected to output: influxdb
-2016/03/05 17:12:12 Starting Telegraf (version 0.10.4.1-40-gd9189da)
-2016/03/05 17:12:12 Loaded outputs: influxdb
-2016/03/05 17:12:12 Loaded inputs: tail
-2016/03/05 17:12:12 Tags enabled: host=localhost.localdomain
-2016/03/05 17:12:12 Agent Config: Interval:5s, Debug:true, Quiet:false, Hostname:"localhost.localdomain", Flush Interval:10s
-2016/03/05 17:12:12 Started a tail log reader, filename: /var/log/nginx/access.ltsv.log
-2016/03/05 17:12:12 Seeked /var/log/nginx/access.ltsv.log - &{Offset:0 Whence:0}
-[root@localhost bin]# > nginx_access,host=localhost,http_host=localhost,http_referer=-,http_user_agent=curl/7.29.0,http_x_forwarded_for=-,remote_addr=127.0.0.1,remote_user=-,request=GET\ /\ HTTP/1.1,scheme=http,status=200 body_bytes_sent=612i,request_time=0 1457165532000000000
-> nginx_access,host=localhost,http_host=localhost,http_referer=-,http_user_agent=curl/7.29.0,http_x_forwarded_for=-,remote_addr=127.0.0.1,remote_user=-,request=GET\ /\ HTTP/1.1,scheme=http,status=200,uniq=1 body_bytes_sent=612i,request_time=0 1457165532000000000
-> nginx_access,host=localhost,http_host=localhost,http_referer=-,http_user_agent=curl/7.29.0,http_x_forwarded_for=-,remote_addr=127.0.0.1,remote_user=-,request=GET\ /\ HTTP/1.1,scheme=http,status=200,uniq=2 body_bytes_sent=612i,request_time=0 1457165532000000000
-2016/03/05 17:12:15 Gathered metrics, (5s interval), from 1 inputs in 30.742µs
+[root@localhost bin]# sudo -u telegraf ./telegraf -config /etc/telegraf/telegraf.conf -input-filter tail -debug & for i in `seq 1 3`; do curl -s -o /dev/null localhost; done && sleep 1 && for i in `seq 1 2`; do curl -s -o /dv/null localhost; done
+[1] 17652
+2016/03/05 17:27:52 Attempting connection to output: influxdb
+2016/03/05 17:27:52 Successfully connected to output: influxdb
+2016/03/05 17:27:52 Starting Telegraf (version 0.10.4.1-40-gd9189da)
+2016/03/05 17:27:52 Loaded outputs: influxdb
+2016/03/05 17:27:52 Loaded inputs: tail
+2016/03/05 17:27:52 Tags enabled: host=localhost.localdomain
+2016/03/05 17:27:52 Agent Config: Interval:5s, Debug:true, Quiet:false, Hostname:"localhost.localdomain", Flush Interval:10s
+2016/03/05 17:27:52 Started a tail log reader, filename: /var/log/nginx/access.ltsv.log
+2016/03/05 17:27:52 Seeked /var/log/nginx/access.ltsv.log - &{Offset:0 Whence:0}
+> nginx_access,host=localhost,http_host=localhost,http_referer=-,http_user_agent=curl/7.29.0,http_x_forwarded_for=-,remote_addr=127.0.0.1,remote_user=-,request=GET\ /\ HTTP/1.1,scheme=http,status=200 body_bytes_sent=612i,request_time=0 1457166472000000000
+> nginx_access,host=localhost,http_host=localhost,http_referer=-,http_user_agent=curl/7.29.0,http_x_forwarded_for=-,remote_addr=127.0.0.1,remote_user=-,request=GET\ /\ HTTP/1.1,scheme=http,status=200,uniq=1 body_bytes_sent=612i,request_time=0 1457166472000000000
+> nginx_access,host=localhost,http_host=localhost,http_referer=-,http_user_agent=curl/7.29.0,http_x_forwarded_for=-,remote_addr=127.0.0.1,remote_user=-,request=GET\ /\ HTTP/1.1,scheme=http,status=200,uniq=2 body_bytes_sent=612i,request_time=0 1457166472000000000
+> nginx_access,host=localhost,http_host=localhost,http_referer=-,http_user_agent=curl/7.29.0,http_x_forwarded_for=-,remote_addr=127.0.0.1,remote_user=-,request=GET\ /\ HTTP/1.1,scheme=http,status=200 body_bytes_sent=612i,request_time=0 1457166473000000000
+> nginx_access,host=localhost,http_host=localhost,http_referer=-,http_user_agent=curl/7.29.0,http_x_forwarded_for=-,remote_addr=127.0.0.1,remote_user=-,request=GET\ /\ HTTP/1.1,scheme=http,status=200,uniq=1 body_bytes_sent=612i,request_time=0 1457166473000000000
 ```

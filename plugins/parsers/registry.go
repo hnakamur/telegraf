@@ -2,6 +2,7 @@ package parsers
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/influxdata/telegraf"
 
@@ -78,6 +79,18 @@ type Config struct {
 	// NOTE: For modifier methods other than "no_op" to work correctly, the log lines
 	// MUST be sorted by timestamps in ascending order.
 	DuplicatePointsModifierMethod string
+	// DuplicatePointsIncrementDuration only applies to LTSV data.
+	// When duplicate_points_modifier_method is "increment_time",
+	// this will be added to the time of the previous measurement
+	// if the time of current time is equal to or less than the
+	// time of the previous measurement.
+	//
+	// NOTE: You need to set this value equal to or greater than
+	// precisions of your output plugins. Otherwise the times will
+	// become the same value!
+	// For the precision of the InfluxDB plugin, please see
+	// https://github.com/influxdata/telegraf/blob/v0.10.1/plugins/outputs/influxdb/influxdb.go#L40-L42
+	DuplicatePointsIncrementDuration time.Duration
 	// DuplicatePointsModifierUniqTag only applies to LTSV data.
 	// When DuplicatePointsModifierMethod is one of "add_uniq_tag",
 	// this will be the label of the tag to be added to ensure uniqueness of points.
@@ -115,6 +128,7 @@ func NewParser(config *Config) (Parser, error) {
 			config.BoolFieldLabels,
 			config.TagLabels,
 			config.DuplicatePointsModifierMethod,
+			config.DuplicatePointsIncrementDuration,
 			config.DuplicatePointsModifierUniqTag,
 			config.DefaultTags,
 		)
@@ -159,21 +173,23 @@ func NewLTSVParser(
 	boolFieldLabels []string,
 	tagLabels []string,
 	duplicatePointsModifierMethod string,
+	duplicatePointsIncrementDuration time.Duration,
 	duplicatePointsModifierUniqTag string,
 	defaultTags map[string]string,
 ) (Parser, error) {
 	parser := &ltsv.LTSVParser{
-		MetricName:                     metricName,
-		TimeLabel:                      timeLabel,
-		TimeFormat:                     timeFormat,
-		StrFieldLabels:                 strFieldLabels,
-		IntFieldLabels:                 intFieldLabels,
-		FloatFieldLabels:               floatFieldLabels,
-		BoolFieldLabels:                boolFieldLabels,
-		TagLabels:                      tagLabels,
-		DuplicatePointsModifierMethod:  duplicatePointsModifierMethod,
-		DuplicatePointsModifierUniqTag: duplicatePointsModifierUniqTag,
-		DefaultTags:                    defaultTags,
+		MetricName:                       metricName,
+		TimeLabel:                        timeLabel,
+		TimeFormat:                       timeFormat,
+		StrFieldLabels:                   strFieldLabels,
+		IntFieldLabels:                   intFieldLabels,
+		FloatFieldLabels:                 floatFieldLabels,
+		BoolFieldLabels:                  boolFieldLabels,
+		TagLabels:                        tagLabels,
+		DuplicatePointsModifierMethod:    duplicatePointsModifierMethod,
+		DuplicatePointsIncrementDuration: duplicatePointsIncrementDuration,
+		DuplicatePointsModifierUniqTag:   duplicatePointsModifierUniqTag,
+		DefaultTags:                      defaultTags,
 	}
 	return parser, nil
 }

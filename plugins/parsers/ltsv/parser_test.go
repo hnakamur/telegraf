@@ -3,6 +3,7 @@ package ltsv
 import (
 	"bytes"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -290,12 +291,13 @@ func TestAddTagDuplicatePointModifier(t *testing.T) {
 
 func TestIncTimeDuplicatePointModifier(t *testing.T) {
 	parser := LTSVParser{
-		MetricName:                    "ltsv_test",
-		TimeLabel:                     "time",
-		TimeFormat:                    "2006-01-02T15:04:05.000000000Z07:00",
-		IntFieldLabels:                []string{"int1"},
-		TagLabels:                     []string{"tag1"},
-		DuplicatePointsModifierMethod: "increment_time",
+		MetricName:                       "ltsv_test",
+		TimeLabel:                        "time",
+		TimeFormat:                       "2006-01-02T15:04:05.000000000Z07:00",
+		IntFieldLabels:                   []string{"int1"},
+		TagLabels:                        []string{"tag1"},
+		DuplicatePointsModifierMethod:    "increment_time",
+		DuplicatePointsIncrementDuration: time.Nanosecond,
 		DefaultTags: map[string]string{
 			"log_host": "log.example.com",
 		},

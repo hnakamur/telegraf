@@ -103,16 +103,30 @@ const sampleConfig = `
   ## MUST be sorted by timestamps in ascending order.
   duplicate_points_modifier_method = "add_uniq_tag"
 
+  ## When duplicate_points_modifier_method is "increment_time",
+  ## this will be added to the time of the previous measurement
+  ## if the time of current time is equal to or less than the
+  ## time of the previous measurement.
+  ##
+  ## NOTE: You need to set this value equal to or greater than
+  ## precisions of your output plugins. Otherwise the times will
+  ## become the same value!
+  ## For the precision of the InfluxDB plugin, please see
+  ## https://github.com/influxdata/telegraf/blob/v0.10.1/plugins/outputs/influxdb/influxdb.go#L40-L42
+  ## For the duration string format, please see
+  ## https://golang.org/pkg/time/#ParseDuration
+  duplicate_points_increment_duration = "1us"
+
   ## When duplicate_points_modifier_method is "add_uniq_tag",
   ## this will be the label of the tag to be added to ensure uniqueness of points.
   ## NOTE: The uniq tag will be only added to the successive points of duplicated
   ## points, it will not be added to the first point of duplicated points.
   ## If you want to always add the uniq tag, add a tag with the same name as
-  ## duplicate_points_modifier_uniq_tag and the string value "0" to default_tags.
+  ## duplicate_points_modifier_uniq_tag and the string value "0" to [inputs.tail.tags].
   duplicate_points_modifier_uniq_tag = "uniq"
 
   ## Defaults tags to be added to measurements.
-  [default_tags]
+  [inputs.tail.tags]
     log_host = "log.example.com"
 `
 

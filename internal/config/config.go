@@ -785,6 +785,19 @@ func buildParser(name string, tbl *ast.Table) (parsers.Parser, error) {
 		}
 	}
 
+	if node, ok := tbl.Fields["duplicate_points_increment_duration"]; ok {
+		if kv, ok := node.(*ast.KeyValue); ok {
+			if str, ok := kv.Value.(*ast.String); ok {
+				dur, err := time.ParseDuration(str.Value)
+				if err != nil {
+					return nil, err
+				}
+
+				c.DuplicatePointsIncrementDuration = dur
+			}
+		}
+	}
+
 	if node, ok := tbl.Fields["duplicate_points_modifier_uniq_tag"]; ok {
 		if kv, ok := node.(*ast.KeyValue); ok {
 			if str, ok := kv.Value.(*ast.String); ok {
@@ -807,6 +820,7 @@ func buildParser(name string, tbl *ast.Table) (parsers.Parser, error) {
 	delete(tbl.Fields, "bool_field_labels")
 	delete(tbl.Fields, "tag_labels")
 	delete(tbl.Fields, "duplicate_points_modifier_method")
+	delete(tbl.Fields, "duplicate_points_increment_duration")
 	delete(tbl.Fields, "duplicate_points_modifier_uniq_tag")
 
 	return parsers.NewParser(c)
