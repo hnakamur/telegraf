@@ -793,6 +793,15 @@ func buildParser(name string, tbl *ast.Table) (parsers.Parser, error) {
 		}
 	}
 
+	c.DefaultTags = make(map[string]string)
+	if node, ok := tbl.Fields["default_tags"]; ok {
+		if subtbl, ok := node.(*ast.Table); ok {
+			if err := config.UnmarshalTable(subtbl, c.DefaultTags); err != nil {
+				log.Printf("Could not parse default_tags for input %s\n", name)
+			}
+		}
+	}
+
 	c.MetricName = name
 
 	delete(tbl.Fields, "data_format")
@@ -808,6 +817,7 @@ func buildParser(name string, tbl *ast.Table) (parsers.Parser, error) {
 	delete(tbl.Fields, "tag_labels")
 	delete(tbl.Fields, "duplicate_points_modifier_method")
 	delete(tbl.Fields, "duplicate_points_modifier_uniq_tag")
+	delete(tbl.Fields, "default_tags")
 
 	return parsers.NewParser(c)
 }
