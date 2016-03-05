@@ -351,8 +351,8 @@ For details, please see the comments in the following configuration example.
   ## If non-zero, split longer lines into multiple lines
   max_line_size = 0
 
-  ## Set this true to enable logging to stderr
-  enable_logging = false
+  ## Set this false to enable logging to stderr, true to disable logging
+  disable_logging = false
 
   ## Data format to consume. Currently only "ltsv" is supported.
   ## Each data format has it's own unique set of configuration options, read

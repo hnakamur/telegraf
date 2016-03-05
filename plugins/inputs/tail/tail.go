@@ -1,7 +1,6 @@
 package tail
 
 import (
-	"log"
 	"sync"
 
 	tailfile "github.com/hpcloud/tail"
@@ -56,8 +55,8 @@ const sampleConfig = `
   ## If non-zero, split longer lines into multiple lines
   max_line_size = 0
 
-  ## Set this true to enable logging to stderr
-  enable_logging = false
+  ## Set this false to enable logging to stderr, true to disable logging
+  disable_logging = false
 
   ## Data format to consume. Currently only "ltsv" is supported.
   ## Each data format has it's own unique set of configuration options, read
@@ -133,7 +132,7 @@ type Tail struct {
 	Follow      bool // Continue looking for new lines (tail -f)
 	MaxLineSize int  // If non-zero, split longer lines into multiple lines
 
-	EnableLogging bool // If true, logs are printed to stderr
+	DisableLogging bool // If false, logs are printed to stderr
 
 	sync.Mutex
 	done chan struct{}
@@ -171,7 +170,7 @@ func (t *Tail) Start(acc telegraf.Accumulator) error {
 		Follow:      t.Follow,
 		MaxLineSize: t.MaxLineSize,
 	}
-	if !t.EnableLogging {
+	if t.DisableLogging {
 		config.Logger = tailfile.DiscardingLogger
 	}
 	tf, err := tailfile.TailFile(t.Filename, config)
@@ -182,7 +181,7 @@ func (t *Tail) Start(acc telegraf.Accumulator) error {
 
 	// Start the log file reader
 	go t.receiver()
-	log.Printf("Started a tail log reader, filename: %s\n", t.Filename)
+	t.tail.Logger.Printf("Started a tail log reader, filename: %s\n", t.Filename)
 
 	return nil
 }
