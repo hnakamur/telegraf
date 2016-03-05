@@ -72,13 +72,19 @@ type Config struct {
 	// TagLabels only applies to LTSV data. This will be the labels of tags.
 	TagLabels []string
 	// DuplicatePointsModifierMethod only applies to LTSV data.
-	// Must be one of add_uniq_tag, increment_time, no_op.
+	// Must be one of "add_uniq_tag", "increment_time", "no_op".
 	// This will be used to modify duplicated points.
 	// For detail, please see https://docs.influxdata.com/influxdb/v0.10/troubleshooting/frequently_encountered_issues/#writing-duplicate-points
+	// NOTE: For modifier methods other than "no_op" to work correctly, the log lines
+	// MUST be sorted by timestamps in ascending order.
 	DuplicatePointsModifierMethod string
 	// DuplicatePointsModifierUniqTag only applies to LTSV data.
-	// When DuplicatePointsModifierMethod is "add_uniq_tag", this will be the label
-	// of the tag to be added to ensure uniqueness of points.
+	// When DuplicatePointsModifierMethod is one of "add_uniq_tag",
+	// this will be the label of the tag to be added to ensure uniqueness of points.
+	// NOTE: The uniq tag will be only added to the successive points of duplicated
+	// points, it will not be added to the first point of duplicated points.
+	// If you want to always add the uniq tag, add a tag with the same name as
+	// DuplicatePointsModifierUniqTag and the string value "0" to DefaultTags.
 	DuplicatePointsModifierUniqTag string
 
 	// DefaultTags are the default tags that will be added to all parsed metrics.

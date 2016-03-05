@@ -147,6 +147,78 @@ func TestParseValidLTSV(t *testing.T) {
 	}, metrics[0].Tags())
 }
 
+func TestAlwaysAddTagDuplicatePointModifier(t *testing.T) {
+	parser := LTSVParser{
+		MetricName:                     "ltsv_test",
+		TimeLabel:                      "time",
+		TimeFormat:                     "2006-01-02T15:04:05.000000000Z07:00",
+		IntFieldLabels:                 []string{"int1"},
+		TagLabels:                      []string{"tag1"},
+		DuplicatePointsModifierMethod:  "add_uniq_tag",
+		DuplicatePointsModifierUniqTag: "uniq",
+		DefaultTags: map[string]string{
+			"log_host": "log.example.com",
+			"uniq":     "0",
+		},
+	}
+
+	metric, err := parser.ParseLine(validLTSV3[0])
+	assert.NoError(t, err)
+	assert.NotNil(t, metric)
+	assert.Equal(t, "ltsv_test", metric.Name())
+	assert.Equal(t, map[string]interface{}{
+		"int1": int64(1),
+	}, metric.Fields())
+	assert.Equal(t, map[string]string{
+		"log_host": "log.example.com",
+		"tag1":     "tval1",
+		"uniq":     "0",
+	}, metric.Tags())
+	assert.Equal(t, "2016-03-06T09:24:12.000000000+09:00", metric.Time().Format(parser.TimeFormat))
+
+	metric, err = parser.ParseLine(validLTSV3[1])
+	assert.NoError(t, err)
+	assert.NotNil(t, metric)
+	assert.Equal(t, "ltsv_test", metric.Name())
+	assert.Equal(t, map[string]interface{}{
+		"int1": int64(2),
+	}, metric.Fields())
+	assert.Equal(t, map[string]string{
+		"log_host": "log.example.com",
+		"tag1":     "tval1",
+		"uniq":     "1",
+	}, metric.Tags())
+	assert.Equal(t, "2016-03-06T09:24:12.000000000+09:00", metric.Time().Format(parser.TimeFormat))
+
+	metric, err = parser.ParseLine(validLTSV3[2])
+	assert.NoError(t, err)
+	assert.NotNil(t, metric)
+	assert.Equal(t, "ltsv_test", metric.Name())
+	assert.Equal(t, map[string]interface{}{
+		"int1": int64(3),
+	}, metric.Fields())
+	assert.Equal(t, map[string]string{
+		"log_host": "log.example.com",
+		"tag1":     "tval1",
+		"uniq":     "2",
+	}, metric.Tags())
+	assert.Equal(t, "2016-03-06T09:24:12.000000000+09:00", metric.Time().Format(parser.TimeFormat))
+
+	metric, err = parser.ParseLine(validLTSV3[3])
+	assert.NoError(t, err)
+	assert.NotNil(t, metric)
+	assert.Equal(t, "ltsv_test", metric.Name())
+	assert.Equal(t, map[string]interface{}{
+		"int1": int64(4),
+	}, metric.Fields())
+	assert.Equal(t, map[string]string{
+		"log_host": "log.example.com",
+		"tag1":     "tval1",
+		"uniq":     "0",
+	}, metric.Tags())
+	assert.Equal(t, "2016-03-06T09:24:12.000000002+09:00", metric.Time().Format(parser.TimeFormat))
+}
+
 func TestAddTagDuplicatePointModifier(t *testing.T) {
 	parser := LTSVParser{
 		MetricName:                     "ltsv_test",
