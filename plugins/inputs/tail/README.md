@@ -141,21 +141,47 @@ It works like the BSD `tail` command and can keep reading when more logs are add
 
 #### Example Output:
 
+This is an example output with `duplicate_points_modifier_method = "add_uniq_tag"`.
+
 ```
 [root@localhost bin]# sudo -u telegraf ./telegraf -config /etc/telegraf/telegraf.conf -input-filter tail -debug & for i in `seq 1 3`; do curl -s -o /dev/null localhost; done && sleep 1 && for i in `seq 1 2`; do curl -s -o /dv/null localhost; done
-[1] 17652
-2016/03/05 17:27:52 Attempting connection to output: influxdb
-2016/03/05 17:27:52 Successfully connected to output: influxdb
-2016/03/05 17:27:52 Starting Telegraf (version 0.10.4.1-40-gd9189da)
-2016/03/05 17:27:52 Loaded outputs: influxdb
-2016/03/05 17:27:52 Loaded inputs: tail
-2016/03/05 17:27:52 Tags enabled: host=localhost.localdomain
-2016/03/05 17:27:52 Agent Config: Interval:5s, Debug:true, Quiet:false, Hostname:"localhost.localdomain", Flush Interval:10s
-2016/03/05 17:27:52 Started a tail log reader, filename: /var/log/nginx/access.ltsv.log
-2016/03/05 17:27:52 Seeked /var/log/nginx/access.ltsv.log - &{Offset:0 Whence:0}
-> nginx_access,host=localhost,http_host=localhost,http_referer=-,http_user_agent=curl/7.29.0,http_x_forwarded_for=-,remote_addr=127.0.0.1,remote_user=-,request=GET\ /\ HTTP/1.1,scheme=http,status=200 body_bytes_sent=612i,request_time=0 1457166472000000000
-> nginx_access,host=localhost,http_host=localhost,http_referer=-,http_user_agent=curl/7.29.0,http_x_forwarded_for=-,remote_addr=127.0.0.1,remote_user=-,request=GET\ /\ HTTP/1.1,scheme=http,status=200,uniq=1 body_bytes_sent=612i,request_time=0 1457166472000000000
-> nginx_access,host=localhost,http_host=localhost,http_referer=-,http_user_agent=curl/7.29.0,http_x_forwarded_for=-,remote_addr=127.0.0.1,remote_user=-,request=GET\ /\ HTTP/1.1,scheme=http,status=200,uniq=2 body_bytes_sent=612i,request_time=0 1457166472000000000
-> nginx_access,host=localhost,http_host=localhost,http_referer=-,http_user_agent=curl/7.29.0,http_x_forwarded_for=-,remote_addr=127.0.0.1,remote_user=-,request=GET\ /\ HTTP/1.1,scheme=http,status=200 body_bytes_sent=612i,request_time=0 1457166473000000000
-> nginx_access,host=localhost,http_host=localhost,http_referer=-,http_user_agent=curl/7.29.0,http_x_forwarded_for=-,remote_addr=127.0.0.1,remote_user=-,request=GET\ /\ HTTP/1.1,scheme=http,status=200,uniq=1 body_bytes_sent=612i,request_time=0 1457166473000000000
+[1] 2894
+2016/03/05 19:04:35 Attempting connection to output: influxdb
+2016/03/05 19:04:35 Successfully connected to output: influxdb
+2016/03/05 19:04:35 Starting Telegraf (version 0.10.4.1-44-ga2a0d51)
+2016/03/05 19:04:35 Loaded outputs: influxdb
+2016/03/05 19:04:35 Loaded inputs: tail
+2016/03/05 19:04:35 Tags enabled: host=localhost.localdomain
+2016/03/05 19:04:35 Agent Config: Interval:5s, Debug:true, Quiet:false, Hostname:"localhost.localdomain", Flush Interval:10s
+2016/03/05 19:04:35 Started a tail log reader, filename: /var/log/nginx/access.ltsv.log
+2016/03/05 19:04:35 Seeked /var/log/nginx/access.ltsv.log - &{Offset:0 Whence:0}
+> nginx_access,host=localhost,http_host=localhost,http_referer=-,http_user_agent=curl/7.29.0,http_x_forwarded_for=-,log_host=log.example.com,remote_addr=127.0.0.1,remote_user=-,request=GET\ /\ HTTP/1.1,scheme=http,status=200 body_bytes_sent=612i,request_time=0 1457172275000000000
+> nginx_access,host=localhost,http_host=localhost,http_referer=-,http_user_agent=curl/7.29.0,http_x_forwarded_for=-,log_host=log.example.com,remote_addr=127.0.0.1,remote_user=-,request=GET\ /\ HTTP/1.1,scheme=http,status=200,uniq=1 body_bytes_sent=612i,request_time=0 1457172275000000000
+> nginx_access,host=localhost,http_host=localhost,http_referer=-,http_user_agent=curl/7.29.0,http_x_forwarded_for=-,log_host=log.example.com,remote_addr=127.0.0.1,remote_user=-,request=GET\ /\ HTTP/1.1,scheme=http,status=200,uniq=2 body_bytes_sent=612i,request_time=0 1457172275000000000
+> nginx_access,host=localhost,http_host=localhost,http_referer=-,http_user_agent=curl/7.29.0,http_x_forwarded_for=-,log_host=log.example.com,remote_addr=127.0.0.1,remote_user=-,request=GET\ /\ HTTP/1.1,scheme=http,status=200 body_bytes_sent=612i,request_time=0 1457172276000000000
+> nginx_access,host=localhost,http_host=localhost,http_referer=-,http_user_agent=curl/7.29.0,http_x_forwarded_for=-,log_host=log.example.com,remote_addr=127.0.0.1,remote_user=-,request=GET\ /\ HTTP/1.1,scheme=http,status=200,uniq=1 body_bytes_sent=612i,request_time=0 1457172276000000000
+2016/03/05 19:04:40 Gathered metrics, (5s interval), from 1 inputs in 23.904µs
+```
+
+
+This is an example output with `duplicate_points_modifier_method = "increment_time"` and `duplicate_points_increment_duration = "1ms"`.
+
+```
+[root@localhost bin]# sudo -u telegraf ./telegraf -config /etc/telegraf/telegraf.conf -input-filter tail -debug & for i in `seq 1 3`; do curl -s -o /dev/null localhost; done && sleep 1 && for i in `seq 1 2`; do curl -s -o /dv/null localhost; done
+[1] 2845
+2016/03/05 19:03:13 Attempting connection to output: influxdb
+2016/03/05 19:03:13 Successfully connected to output: influxdb
+2016/03/05 19:03:13 Starting Telegraf (version 0.10.4.1-44-ga2a0d51)
+2016/03/05 19:03:13 Loaded outputs: influxdb
+2016/03/05 19:03:13 Loaded inputs: tail
+2016/03/05 19:03:13 Tags enabled: host=localhost.localdomain
+2016/03/05 19:03:13 Agent Config: Interval:5s, Debug:true, Quiet:false, Hostname:"localhost.localdomain", Flush Interval:10s
+2016/03/05 19:03:13 Started a tail log reader, filename: /var/log/nginx/access.ltsv.log
+2016/03/05 19:03:13 Seeked /var/log/nginx/access.ltsv.log - &{Offset:0 Whence:0}
+> nginx_access,host=localhost,http_host=localhost,http_referer=-,http_user_agent=curl/7.29.0,http_x_forwarded_for=-,log_host=log.example.com,remote_addr=127.0.0.1,remote_user=-,request=GET\ /\ HTTP/1.1,scheme=http,status=200 body_bytes_sent=612i,request_time=0 1457172193000000000
+> nginx_access,host=localhost,http_host=localhost,http_referer=-,http_user_agent=curl/7.29.0,http_x_forwarded_for=-,log_host=log.example.com,remote_addr=127.0.0.1,remote_user=-,request=GET\ /\ HTTP/1.1,scheme=http,status=200 body_bytes_sent=612i,request_time=0 1457172193001000000
+> nginx_access,host=localhost,http_host=localhost,http_referer=-,http_user_agent=curl/7.29.0,http_x_forwarded_for=-,log_host=log.example.com,remote_addr=127.0.0.1,remote_user=-,request=GET\ /\ HTTP/1.1,scheme=http,status=200 body_bytes_sent=612i,request_time=0 1457172193002000000
+> nginx_access,host=localhost,http_host=localhost,http_referer=-,http_user_agent=curl/7.29.0,http_x_forwarded_for=-,log_host=log.example.com,remote_addr=127.0.0.1,remote_user=-,request=GET\ /\ HTTP/1.1,scheme=http,status=200 body_bytes_sent=612i,request_time=0 1457172194000000000
+> nginx_access,host=localhost,http_host=localhost,http_referer=-,http_user_agent=curl/7.29.0,http_x_forwarded_for=-,log_host=log.example.com,remote_addr=127.0.0.1,remote_user=-,request=GET\ /\ HTTP/1.1,scheme=http,status=200 body_bytes_sent=612i,request_time=0 1457172194001000000
+2016/03/05 19:03:15 Gathered metrics, (5s interval), from 1 inputs in 52.911µs
 ```
