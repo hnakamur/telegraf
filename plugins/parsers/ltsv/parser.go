@@ -192,7 +192,7 @@ type AddTagDupPointModifier struct {
 }
 
 func (m *AddTagDupPointModifier) Modify(t *time.Time, tags map[string]string) {
-	if *t == m.prevTime {
+	if t.Equal(m.prevTime) {
 		m.dupCount++
 		tags[m.UniqTagName] = strconv.FormatInt(m.dupCount, 10)
 	} else {
