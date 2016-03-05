@@ -8,6 +8,9 @@ It works like the BSD `tail` command and can keep reading when more logs are add
 ```toml
 # Read a log file like the BSD tail command
 [[inputs.ltsv_log]]
+  ## The measurement name
+  name_override = "nginx_access"
+
   ## A LTSV formatted log file path.
   ## See http://ltsv.org/ for Labeled Tab-separated Values (LTSV)
   ## Here is an example config for nginx (http://nginx.org/en/).
@@ -62,9 +65,6 @@ It works like the BSD `tail` command and can keep reading when more logs are add
   ## https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_INPUT.md
   data_format = "ltsv"
 
-  ## The measurement name
-  metric_name = "nginx_access"
-
   ## Time label to be used to create a timestamp for a measurement.
   time_label = "time"
 
@@ -110,7 +110,7 @@ It works like the BSD `tail` command and can keep reading when more logs are add
   duplicate_points_modifier_uniq_tag = "uniq"
 
   ## Defaults tags to be added to measurements.
-  [[default_tags]]
+  [default_tags]
     log_host = "log.example.com"
 ```
 

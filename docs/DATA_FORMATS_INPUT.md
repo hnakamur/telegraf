@@ -306,6 +306,9 @@ For details, please see the comments in the following configuration example.
 
 ```toml
 [[inputs.tail]]
+  ## The measurement name
+  override_name = "nginx_access"
+
   ## A LTSV formatted log file path.
   ## See http://ltsv.org/ for Labeled Tab-separated Values (LTSV)
   ## Here is an example config for nginx (http://nginx.org/en/).
@@ -360,9 +363,6 @@ For details, please see the comments in the following configuration example.
   ## https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_INPUT.md
   data_format = "ltsv"
 
-	## Metric name for measurements to be added.
-	metric_name = "ltsv_example"
-
   ## Time label to be used to create a timestamp for a measurement.
   time_label = "time"
 
@@ -371,22 +371,22 @@ For details, please see the comments in the following configuration example.
   time_format = "2006-01-02T15:04:05Z07:00"
 
   ## Labels for string fields.
-	str_field_labels = ["str1"]
+  str_field_labels = ["str1"]
 
   ## Labels for integer (64bit signed decimal integer) fields.
   ## For acceptable integer values, please refer to:
   ## https://golang.org/pkg/strconv/#ParseInt
-	int_field_labels = ["int1", "int2"]
+  int_field_labels = ["int1", "int2"]
 
   ## Labels for float (64bit float) fields.
   ## For acceptable float values, please refer to:
   ## https://golang.org/pkg/strconv/#ParseFloat
-	float_field_labels = ["float1"]
+  float_field_labels = ["float1"]
 
   ## Labels for boolean fields.
   ## For acceptable boolean values, please refer to:
   ## https://golang.org/pkg/strconv/#ParseBool
-	bool_field_labels = ["bool1", "bool2"]
+  bool_field_labels = ["bool1", "bool2"]
 
   ## Labels for tags to be added
   tag_labels = ["tag1", "tag2"]
@@ -408,6 +408,6 @@ For details, please see the comments in the following configuration example.
   duplicate_points_modifier_uniq_tag = "uniq"
 
   ## Defaults tags to be added to measurements.
-  [[default_tags]]
+  [default_tags]
     log_host = "log.example.com"
 ```
