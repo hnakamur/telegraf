@@ -377,6 +377,8 @@ func TestNoOpDuplicatePointModifier(t *testing.T) {
 
 	metrics, err := parser.Parse(buf.Bytes())
 	assert.NoError(t, err)
+	// NOTE: Even though 4 metrics are created here, 3 of these will be merged on
+	// a InfluxDB database.
 	assert.Len(t, metrics, 4)
 
 	assert.Equal(t, "ltsv_test", metrics[0].Name())

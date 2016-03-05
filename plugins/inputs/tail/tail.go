@@ -168,7 +168,7 @@ func (t *Tail) SetParser(parser parsers.Parser) {
 	t.parser = parser
 }
 
-// Start the ltsv log reader. Caller must call *ltsvLogReader.Stop() to clean up.
+// Start a tail log reader. Caller must call *Tail.Stop() to clean up.
 func (t *Tail) Start(acc telegraf.Accumulator) error {
 	t.Lock()
 	defer t.Unlock()

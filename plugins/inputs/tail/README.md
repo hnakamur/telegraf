@@ -137,7 +137,7 @@ It works like the BSD `tail` command and can keep reading when more logs are add
 
 #### Tags:
 
-- tags specified in the config `default_tags`, `duplicate_points_modifier_uniq_tag`, `tag_labels` values.
+- tags specified in the config `inputs.tail.tags`, `duplicate_points_modifier_uniq_tag`, `tag_labels` values.
 
 #### Example Output:
 
