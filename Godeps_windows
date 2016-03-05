@@ -53,5 +53,7 @@ golang.org/x/net 04b9de9b512f58addf28c9853d50ebef61c3953e
 golang.org/x/text 6d3c22c4525a4da167968fa2479be5524d2e8bd0
 gopkg.in/dancannon/gorethink.v1 6f088135ff288deb9d5546f4c71919207f891a70
 gopkg.in/fatih/pool.v2 cba550ebf9bce999a02e963296d4bc7a486cb715
+gopkg.in/fsnotify.v1 8611c35ab31c1c28aa903d33cf8b6e44a399b09e
+gopkg.in/tomb.v1 dd632973f1e7218eb1089048e0798ec9ae7dceb8
 gopkg.in/mgo.v2 03c9f3ee4c14c8e51ee521a6a7d0425658dd6f64
 gopkg.in/yaml.v2 f7716cbe52baa25d2e9b0d0da546fcf909fc16b4
