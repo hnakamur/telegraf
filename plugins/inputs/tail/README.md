@@ -128,6 +128,19 @@ It works like the BSD `tail` command and can keep reading when more logs are add
 #### Example Output:
 
 ```
-[root@localhost telegraf]# sudo -u telegraf ./telegraf -config /etc/telegraf/telegraf.conf -input-filter tail -debug
-TODO: put an example output here.
+[root@localhost bin]# sudo -u telegraf ./telegraf -config /etc/telegraf/telegraf.conf -input-filter tail -debug & for i in `seq 1 3`; do curl -s -o /dev/null localhost; done
+[1] 16874
+2016/03/05 17:12:12 Attempting connection to output: influxdb
+2016/03/05 17:12:12 Successfully connected to output: influxdb
+2016/03/05 17:12:12 Starting Telegraf (version 0.10.4.1-40-gd9189da)
+2016/03/05 17:12:12 Loaded outputs: influxdb
+2016/03/05 17:12:12 Loaded inputs: tail
+2016/03/05 17:12:12 Tags enabled: host=localhost.localdomain
+2016/03/05 17:12:12 Agent Config: Interval:5s, Debug:true, Quiet:false, Hostname:"localhost.localdomain", Flush Interval:10s
+2016/03/05 17:12:12 Started a tail log reader, filename: /var/log/nginx/access.ltsv.log
+2016/03/05 17:12:12 Seeked /var/log/nginx/access.ltsv.log - &{Offset:0 Whence:0}
+[root@localhost bin]# > nginx_access,host=localhost,http_host=localhost,http_referer=-,http_user_agent=curl/7.29.0,http_x_forwarded_for=-,remote_addr=127.0.0.1,remote_user=-,request=GET\ /\ HTTP/1.1,scheme=http,status=200 body_bytes_sent=612i,request_time=0 1457165532000000000
+> nginx_access,host=localhost,http_host=localhost,http_referer=-,http_user_agent=curl/7.29.0,http_x_forwarded_for=-,remote_addr=127.0.0.1,remote_user=-,request=GET\ /\ HTTP/1.1,scheme=http,status=200,uniq=1 body_bytes_sent=612i,request_time=0 1457165532000000000
+> nginx_access,host=localhost,http_host=localhost,http_referer=-,http_user_agent=curl/7.29.0,http_x_forwarded_for=-,remote_addr=127.0.0.1,remote_user=-,request=GET\ /\ HTTP/1.1,scheme=http,status=200,uniq=2 body_bytes_sent=612i,request_time=0 1457165532000000000
+2016/03/05 17:12:15 Gathered metrics, (5s interval), from 1 inputs in 30.742µs
 ```
