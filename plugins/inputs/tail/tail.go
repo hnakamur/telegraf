@@ -150,6 +150,10 @@ func (t *Tail) Description() string {
 	return "Read a log file like the BSD tail command"
 }
 
+func (t *Tail) SetParser(parser parsers.Parser) {
+	t.parser = parser
+}
+
 // Start the ltsv log reader. Caller must call *ltsvLogReader.Stop() to clean up.
 func (t *Tail) Start(acc telegraf.Accumulator) error {
 	t.Lock()
